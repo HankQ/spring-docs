@@ -1774,7 +1774,7 @@ JSR-330将这样的变种称为Provider，它使用`Provider<MyTargetBean>` 声�
 </bean>
 ```
 
-在上面的例子中，单例bean（`userManager`）注入了注入了HTTP `Session`级别的`userPreferences`依赖。 显然， 问题就是`userPreferences`在Spring容器中只会实例化一次。它的依赖项（在这种情况下只有一个，`userPreferences`）也只注入一次。 这意味着`userManager` 每次使用的是完全相同的`userPreferences`对象（即最初注入它的对象）进行操作。
+在上面的例子中，单例bean（`userManager`）注入了注入了HTTP `Session`级别的`userPreferences`依赖。userManager 在这里是单例的：它在每个容器中只会实例化一次。它的依赖项（在这种情况下只有一个，`userPreferences`）也只注入一次。 这意味着`userManager` 每次使用的是完全相同的`userPreferences`对象（即最初注入它的对象）进行操作。
 
 这不是将短周期作用域bean注入到长周期作用域bean时所需的行为，例如将HTTP `Session`级别的作用域bean作为依赖注入到单例bean中。相反，开发者需要一个 `userManager`对象， 而在HTTP `Session`的生命周期中，开发者需要一个特定于HTTP Session的 userPreferences 对象。因此，容器创建一个对象，该对象公开与UserPreferences类（理想情况下为`UserPreferences`实例的对象） 完全相同的公共接口，该对象可以从作用域机制（HTTP Request、`Session`等）中获取真实的`UserPreferences`对象。容器将这个代理对象注入到`userManager`中， 而不知道这个`UserPreferences`引用是一个代理。在这个例子中，当一个UserManager实例在依赖注入的UserPreferences对象上调用一个方法时， 它实际上是在调用代理的方法，再由代理从HTTP `Session`（本例）获取真实的`UserPreferences`对象，并将方法调用委托给检索到的实际`UserPreferences`对象。
 
